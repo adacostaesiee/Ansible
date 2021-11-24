@@ -1,9 +1,37 @@
 ---
 - hosts: [webservers]
-
+  become: true
+  vars:
+    users:
+      - "esiee"
+    pubkey: "{{ lookup('file', './id_rsa.pub') }}"
+    pubkeyzhu: "{{ lookup('file', './id_rsa_zhu.pub') }}"
   tasks:
     - ping: ~
-    - name: Install apache
-      become: true
-      apt:
-        name: apache2
+    - name: "Create admin group"
+      group:
+        name: "admin"
+        state: present
+    - name: "Create user accounts"
+      user:
+        name: "{{ item }}"
+        groups: "admin"
+      with_items: "{{ users }}"
+    - name: "Create directory"
+      file:
+        path: "/home/esiee/.ssh"
+        state: directory
+    - name: "Create empty file"
+      file:
+        path: "/home/esiee/.ssh/authorized_keys"
+        state: touch
+    - name: "Push pubkey"
+      lineinfile:
+        path: "/home/esiee/.ssh/authorized_keys"
+        line: "{{ pubkey }}"
+    - name: "Allow admin users to sudo without a password"
+      lineinfile:
+        dest: "/etc/sudoers"
+        state: "present"
+        regexp: "^%admin"
+        line: "%admin ALL=(ALL) NOPASSWD: ALL"

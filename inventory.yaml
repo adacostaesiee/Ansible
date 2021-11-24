@@ -1,7 +1,6 @@
-[webservers]
-10.49.34.97
-
-
-[webservers:vars]
-ansible_python_interpreter=/usr/bin/python3
-ansible_user=user
+webservers:
+  hosts:
+    10.49.34.97
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_user: user
