@@ -5,5 +5,9 @@ all:
   children:
     webservers:
       hosts:
+        #Webserver1A
         10.49.34.97:
+        #Webserver2A
+        10.49.34.227:
+        #Webserver1C
         10.49.33.211:
