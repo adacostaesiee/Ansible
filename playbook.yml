@@ -1,5 +1,5 @@
 ---
-- hosts: [webservers]
+- hosts: all
   become: true
   vars:
     users:
@@ -36,6 +36,9 @@
         state: "present"
         regexp: "^%admin"
         line: "%admin ALL=(ALL) NOPASSWD: ALL"
-
-    - name: install apache
-      apt: name=apache2 update_cache=yes state=latest
+    - name: "Build hosts file"
+      lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_default_ipv4.address }} {{item}}" state=present
+      when: hostvars[item].ansible_default_ipv4.address is defined
+      with_items: "{{groups.all}}"
+    - name: "Install Heartbeat"
+      apt: name=heartbeat

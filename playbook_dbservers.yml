@@ -1,0 +1,4 @@
+---
+- hosts: [dbservers]
+  become: true
+  tasks:
