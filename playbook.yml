@@ -29,6 +29,7 @@
       lineinfile:
         path: "/home/esiee/.ssh/authorized_keys"
         line: "{{ pubkey }}"
+        line: "{{ pubkeyzhu}}"
     - name: "Allow admin users to sudo without a password"
       lineinfile:
         dest: "/etc/sudoers"
