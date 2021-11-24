@@ -1,0 +1,9 @@
+---
+- hosts: [webservers]
+
+  tasks:
+    - ping: ~
+    - name: Install apache
+      become: true
+      apt:
+        name: apache2

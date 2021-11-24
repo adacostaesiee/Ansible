@@ -1,1 +1,7 @@
-10.49.34.97 ansible_user=user ansible_python_interpreter=/usr/bin/python3
+[webservers]
+10.49.34.97
+
+
+[webservers:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_user=user
