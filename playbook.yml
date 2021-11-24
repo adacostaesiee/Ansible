@@ -36,3 +36,6 @@
         state: "present"
         regexp: "^%admin"
         line: "%admin ALL=(ALL) NOPASSWD: ALL"
+
+    - name: install apache
+      apt: name=apache2 update_cache=yes state=latest
