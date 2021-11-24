@@ -1,7 +1,9 @@
-webservers:
-  hosts:
-    10.49.34.97
-    10.49.33.211
+all:
   vars:
     ansible_python_interpreter: /usr/bin/python3
     ansible_user: user
+  children:
+    webservers:
+      hosts:
+        10.49.34.97
+        10.49.33.211
