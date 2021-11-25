@@ -8,8 +8,8 @@
       apt:
         name: heartbeat
     - name: "Push Heartbeat config files to webservers"
-        - template:
-            src: "{{ item }}"
-            dest: /etc/heartbeat/{{ item | basename | regex_replace('\.j2$', '') }}
-          with_fileglob:
-            - ../templates/*.j2
+      template:
+        src: "{{ item }}"
+        dest: /etc/heartbeat/{{ item | basename | regex_replace('\.j2$', '') }}
+      with_fileglob:
+        - ./templates/*.j2

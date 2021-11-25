@@ -7,21 +7,15 @@ all:
       hosts:
         Webserver1A:
           ansible_host: 10.49.34.97
-        #Webserver2A
         Webserver2A:
           ansible_host: 10.49.34.227
-        #Webserver1C
         Webserver1C:
-          ansible_host: 10.49.34.219
-        #Webserver2C
+          ansible_host: 10.49.35.251
         Webserver2C:
-          ansible_host: 10.49.32.106
+          ansible_host: 10.49.34.117
     dbservers:
       hosts:
-        #BDDSQL1A
-        #BDDSQL2A
-        #BDDSQL1C
         BDDSQL1C:
-          ansible_host: 10.49.34.192
+          ansible_host: 10.49.33.149
         BDDSQL2C:
-          ansible_host: 10.49.34.143
+          ansible_host: 10.49.33.150

@@ -1,19 +1,17 @@
-# Stockage des logs
 logfile /var/log/heartbeat.log
-# Gestion des logs par syslog, catégorie daemon
+
 logfacility daemon
-# Membres du cluster HA Heartbeat
-{% for host in groups['webservers']%}
+
+{% for host in groups['webservers'] %}
 {{'node '+host}}
-{% endfor}
-node
-# Périodicité de contrôle des noeuds entre eux
+{% endfor %}
+
 keepalive 1
-# Temps avant qu'un noeud soit considéré comme mort
+
 deadtime 10
-# Interface utilisée pour les broadcast Heartbeat
+
 bcast enp0s9
-# Adresse GW pour vérifier la bonne connectivité
+
 ping 10.49.32.1
-# Rebasculement automatique sur le principal dès qu'il redevient up
+
 auto_failback yes
