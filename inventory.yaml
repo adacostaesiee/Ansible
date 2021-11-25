@@ -11,7 +11,5 @@ all:
           ansible_host: 192.168.77.12
     dbservers:
       hosts:
-        BDDSQL1C:
-          ansible_host: 10.49.33.149
-        BDDSQL2C:
-          ansible_host: 10.49.33.150
+        dbserver1:
+          ansible_host: 192.168.77.31

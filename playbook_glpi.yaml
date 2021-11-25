@@ -1,0 +1,80 @@
+---
+- name: "Download and install glpi"
+  hosts: [webservers]
+  become: true
+
+  vars:
+    glpi_version: 9.5.6
+    glpi_version_package: glpi-9.5.6.tgz
+
+    glpi_auto_install: false
+    glpi_update: false
+    glpi_download_url: "https://github.com/glpi-project/glpi/releases/download/{{ glpi_version }}/{{ glpi_version_package }}"
+
+    glpi_web_owner: "www-data"
+    glpi_web_group: "www-data"
+    glpi_install_path: /var/www
+
+    glpi_db_host: "dbserver1"
+    glpi_db_port: "3306"
+    glpi_db_name: "glpi"
+    glpi_db_user: "glpi"
+    glpi_db_password: "password"
+
+  tasks:
+    - name: "Check if GLPI is already installed"
+      stat:
+        path: "{{ glpi_install_path }}/glpi"
+      register: glpiinstalled
+
+    - name: "Download and extract GLPI"
+      unarchive:
+        src: "{{ glpi_download_url }}"
+        remote_src: true
+        dest: "{{ glpi_install_path }}"
+        owner: "{{ glpi_web_owner }}"
+        group: "{{ glpi_web_group }}"
+        validate_certs: false
+      when: not glpiinstalled.stat.exists or glpi_update
+
+    - name: "Automatic installation"
+      command: "php bin/console -n db:install -H {{ glpi_db_host }} -P {{ glpi_db_port }} -d {{ glpi_db_name }} -u {{ glpi_db_user }} -p {{ glpi_db_password }}"
+      args:
+        chdir: "{{ glpi_install_path }}/glpi"
+      when: ( not glpiinstalled.stat.exists or glpi_update ) and glpi_auto_install
+      notify:
+        - Remove install.php
+        - Add htaccess
+
+    - name: "Set permisions to files directory"
+      file:
+        path: "{{ glpi_install_path }}/glpi/files"
+        recurse: true
+        owner: "{{ glpi_web_owner }}"
+        group: "{{ glpi_web_group }}"
+      when: not glpiinstalled.stat.exists or glpi_update
+
+    - name: "Set permisions to config directory"
+      file:
+        path: "{{ glpi_install_path }}/glpi/config"
+        recurse: true
+        owner: "{{ glpi_web_owner }}"
+        group: "{{ glpi_web_group }}"
+      when: not glpiinstalled.stat.exists or glpi_update
+
+    - name: "Download plugins"
+      get_url:
+        url: "{{ item }}"
+        dest: "{{ glpi_install_path }}/glpi/plugins"
+      with_items: "{{ glpi_plugins_dl_addr }}"
+      when: glpi_plugins_dl_addr is defined
+
+    - name: "Unarchive plugins"
+      unarchive:
+        src: "{{ glpi_install_path }}/glpi/plugins/{{ item }}"
+        dest: "{{ glpi_install_path }}/glpi/plugins"
+        owner: "{{ glpi_web_owner }}"
+        group: "{{ glpi_web_group }}"
+        remote_src: true
+      with_items: "{{ glpi_plugins_tar_name }}"
+      when: glpi_plugins_dl_addr is defined

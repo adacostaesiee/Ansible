@@ -4,21 +4,30 @@
 
   tasks:
     - name: Install MariaDB Server 10.3
-      apt: name=mariadb-server state=latest
-    - name: Install MariaDB Client 10.3
-      apt: name=mariadb-client state=latest
+      apt:
+        name: mariadb-server
+        state: latest
 
+    - name: Install MariaDB Client 10.3
+      apt:
+        name: mariadb-client
+        state: latest
 
     - name: Create MariaDB Directories
-      file: path=/data/MariaDB state=directory owner=mysql group=mysql recurse=yes
+      file:
+        path: /data/MariaDB
+        state: directory
+        owner: mysql
+        group: mysql
+        recurse: yes
       with_items:
         - db
         - log
 
     - name: Count files in /data/db
       find:
-        path=/data/db
-        patterns='\*'
+        path: /data/db
+        patterns: '\*'
       register: db_files
 
     - name: Run mysql_install_db only if /data/db is empty
@@ -27,6 +36,17 @@
 
     - name: Start MariaDB
       service:
-        name=mysql
-        state=started
+        name: mysql
+        state: started
 
+    - name: Create a new database with name glpi
+      community.mysql.mysql_db:
+        name: glpi
+        state: present
+
+    - name: Create database user with all database privileges
+      community.mysql.mysql_user:
+        name: glpi
+        password: password
+        priv: '*.*:ALL'
+        state: present

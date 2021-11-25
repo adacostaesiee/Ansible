@@ -1,6 +1,7 @@
 ---
 - hosts: [webservers]
   become: true
+
   tasks:
     - name: "Apt-get update"
       shell: 'apt-get update'
@@ -12,6 +13,12 @@
           - apache2-doc
           - apache2-utils
           - heartbeat
+          - mod_ssl
+          - php
+          - php-ldap
+          - php-mysql
+          - php-mbstring
+          - php-gd
         update_cache: yes
         state: latest
     - name: "Push Heartbeat config files to webservers"
