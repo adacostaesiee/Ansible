@@ -6,9 +6,9 @@ all:
     webservers:
       hosts:
         webserver1:
-          ansible_host: 10.49.34.97
+          ansible_host: 192.168.77.71
         webserver2:
-          ansible_host: 10.49.34.227
+          ansible_host: 192.168.77.12
     dbservers:
       hosts:
         BDDSQL1C:

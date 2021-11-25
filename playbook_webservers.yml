@@ -17,12 +17,12 @@
     - name: "Push Heartbeat config files to webservers"
       template:
         src: "{{ item }}"
-        dest: /etc/heartbeat/{{ item | basename | regex_replace('\.j2$', '') }}
+        dest: /etc/ha.d/{{ item | basename | regex_replace('\.j2$', '') }}
       with_fileglob:
         - templates/*.j2
 
     - name: "Change Heartbeat's folder rights to 600"
-      shell: 'chmod 600 /etc/ha.d/*'
+      shell: 'chmod 600 /etc/ha.d/authkeys'
 
     - name: "Push Apache2 config file to webservers"
       template:
