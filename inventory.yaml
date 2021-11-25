@@ -12,7 +12,7 @@ all:
           ansible_host: 10.49.34.227
         #Webserver1C
         Webserver1C:
-          ansible_host: 10.49.33.211
+          ansible_host: 10.49.34.118
         #Webserver2C
         Webserver2C:
           ansible_host: 10.49.35.123
