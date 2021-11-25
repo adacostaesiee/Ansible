@@ -1,4 +1,11 @@
 ---
-- hosts: [dbservers]
+- hosts:
   become: true
+
   tasks:
+    - name: "Install mariadatabase"
+      apt: name={{item}} state=latest update_cache=yes
+      with_items:
+        - mariadb-server
+        - mariadb-common
+        - mariadb-client
