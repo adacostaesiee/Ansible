@@ -22,6 +22,6 @@ all:
         #BDDSQL2A
         #BDDSQL1C
         BDDSQL1C:
-          ansible_host: 10.49.34.99
+          ansible_host: 10.49.35.116
         BDDSQL2C:
-          ansible_host: 10.49.35.76
+          ansible_host: 10.49.34.192
