@@ -5,14 +5,10 @@ all:
   children:
     webservers:
       hosts:
-        Webserver1A:
+        webserver1:
           ansible_host: 10.49.34.97
-        Webserver2A:
+        webserver2:
           ansible_host: 10.49.34.227
-        Webserver1C:
-          ansible_host: 10.49.35.251
-        Webserver2C:
-          ansible_host: 10.49.34.117
     dbservers:
       hosts:
         BDDSQL1C:

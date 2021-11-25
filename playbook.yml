@@ -6,6 +6,7 @@
       - "esiee"
     pubkey: "{{ lookup('file', './id_rsa.pub') }}"
     pubkeyzhu: "{{ lookup('file', './id_rsa_zhu.pub') }}"
+    clustername: "10.49.34.229 webserver-cluster"
   tasks:
     - ping: ~
     - name: "Create admin group"

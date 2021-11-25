@@ -2,14 +2,54 @@
 - hosts: [webservers]
   become: true
   tasks:
-    - name: "Install apache2"
-      apt: name=apache2 update_cache=yes state=latest
-    - name: "Install Heartbeat on Webservers"
+    - name: "Apt-get update"
+      shell: 'apt-get update'
+
+    - name: "Install apache2 and Heartbeat on webservers"
       apt:
-        name: heartbeat
+        name:
+          - apache2
+          - apache2-doc
+          - apache2-utils
+          - heartbeat
+        update_cache: yes
+        state: latest
     - name: "Push Heartbeat config files to webservers"
       template:
         src: "{{ item }}"
         dest: /etc/heartbeat/{{ item | basename | regex_replace('\.j2$', '') }}
       with_fileglob:
-        - ./templates/*.j2
+        - templates/*.j2
+
+    - name: "Change Heartbeat's folder rights to 600"
+      shell: 'chmod 600 /etc/ha.d/*'
+
+    - name: "Push Apache2 config file to webservers"
+      template:
+        src: "{{ item }}"
+        dest: /etc/apache2/sites-available/{{ item | basename | regex_replace('\.j2$', '') }}.conf
+      with_fileglob:
+        - files/*.j2
+
+    - name: "Start Heartbeat service on hosts"
+      ansible.builtin.service:
+        name: heartbeat
+        state: started
+
+    - name: "Acitvate the VHOST and restarting apache2"
+      shell: 'a2ensite webapp'
+      shell: 'service apache2 restart'
+
+    - name: "Check services status"
+      command: systemctl status "{{ item }}"
+      with_items:
+        - heartbeat
+        - apache2
+      register: result
+      ignore_errors: yes
+      tags: heartbeat
+
+    - name: showing report
+      debug:
+        var: result.results[0].stdout_lines
+      tags: heartbeat
