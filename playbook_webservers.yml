@@ -21,6 +21,7 @@
           - php-gd
         update_cache: yes
         state: latest
+
     - name: "Push Heartbeat config files to webservers"
       template:
         src: "{{ item }}"

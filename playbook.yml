@@ -6,37 +6,47 @@
       - "esiee"
     pubkey: "{{ lookup('file', './id_rsa.pub') }}"
     pubkeyzhu: "{{ lookup('file', './id_rsa_zhu.pub') }}"
-    clustername: "10.49.34.229 webserver-cluster"
+
   tasks:
     - ping: ~
     - name: "Create admin group"
       group:
         name: "admin"
         state: present
-    - name: "Create user accounts"
+
+    - name: "Add sudoers users to admin group"
       user:
         name: "{{ item }}"
         groups: "admin"
+        append: yes
+        state: present
+        createhome: yes
       with_items: "{{ users }}"
+
     - name: "Create directory"
       file:
         path: "/home/esiee/.ssh"
         state: directory
+
     - name: "Create empty file"
       file:
         path: "/home/esiee/.ssh/authorized_keys"
         state: touch
+
     - name: "Push pubkey"
       lineinfile:
         path: "/home/esiee/.ssh/authorized_keys"
         line: "{{ pubkey }}"
-        line: "{{ pubkeyzhu}}"
-    - name: "Allow admin users to sudo without a password"
+        line: "{{ pubkeyzhu }}"
+
+    - name: "Allow 'admin' group to have passwordless sudo"
       lineinfile:
-        dest: "/etc/sudoers"
-        state: "present"
-        regexp: "^%admin"
-        line: "%admin ALL=(ALL) NOPASSWD: ALL"
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%admin'
+        line: '%admin ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
     - name: "Build hosts file"
       lineinfile:
         path: /etc/hosts

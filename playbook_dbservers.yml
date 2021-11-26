@@ -3,14 +3,12 @@
   become: true
 
   tasks:
-    - name: Install MariaDB Server 10.3
+    - name: Install MariaDB Client 10.3, MariaDB Server 10.3 and MySQL-Python
       apt:
-        name: mariadb-server
-        state: latest
-
-    - name: Install MariaDB Client 10.3
-      apt:
-        name: mariadb-client
+        name:
+          - mariadb-server
+          - mariadb-client
+          - python3-pymysql
         state: latest
 
     - name: Create MariaDB Directories
@@ -39,14 +37,49 @@
         name: mysql
         state: started
 
+    - name: Allow remote hosts to connect
+      lineinfile:
+        path: /etc/mysql/mariadb.conf.d/50-server.cnf
+        backrefs: yes
+        regexp: '^bind-address'
+        line: 'bind-address            = 0.0.0.0'
+        state: present
+
+    - name: Start MariaDB
+      service:
+        name: mysql
+        state: restarted
+
+    - name: "Mysql Configuration - Resetting RootPassword"
+      mysql_user:
+        login_user: root
+        login_password: root
+        name: root
+        host_all: yes
+        password: root
+
+    - name: Create user
+      mysql_user:
+        login_host: dbserver1
+        login_user: root
+        login_password: root
+        name: glpi
+        password: password
+        state: present
+        host_all: yes
+
     - name: Create a new database with name glpi
       community.mysql.mysql_db:
         name: glpi
+        login_host: dbserver1
+        login_user: root
+        login_password: root
         state: present
 
     - name: Create database user with all database privileges
       community.mysql.mysql_user:
         name: glpi
+        login_unix_socket: "/var/run/mysqld/mysqld.sock"
         password: password
         priv: '*.*:ALL'
         state: present
