@@ -25,6 +25,7 @@
           - php-xmlrpc
           - php-zip
           - php7.4-bz2
+          - python3-pymysql
         update_cache: yes
         state: latest
 
@@ -35,7 +36,7 @@
       with_fileglob:
         - templates/*.j2
 
-    - name: "Change Heartbeat's folder rights to 600"
+    - name: "Change authkeys file rights to 600"
       shell: 'chmod 600 /etc/ha.d/authkeys'
 
     - name: "Push Apache2 config file to webservers"
@@ -43,7 +44,7 @@
         src: "{{ item }}"
         dest: /etc/apache2/sites-available/{{ item | basename | regex_replace('\.j2$', '') }}.conf
       with_fileglob:
-        - files/*.j2
+        - files/webapp.j2
 
     - name: "Start Heartbeat service on hosts"
       ansible.builtin.service:
@@ -51,7 +52,8 @@
         state: started
 
     - name: "Acitvate the VHOST and restarting apache2"
-      shell: 'a2ensite webapp'
+      shell: 'a2ensite webapp.conf'
+      shell: 'a2dissite 000-default.conf'
       shell: 'systemctl reload apache2'
 
     - name: "Check services status"

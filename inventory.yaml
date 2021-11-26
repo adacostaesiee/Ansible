@@ -6,10 +6,16 @@ all:
     webservers:
       hosts:
         webserver1:
-          ansible_host: 10.49.34.97
+          ansible_host: 192.168.77.71
         webserver2:
-          ansible_host: 10.49.34.227
+          ansible_host: 192.168.77.12
     dbservers:
       hosts:
         dbserver1:
-          ansible_host: 10.49.35.136
+          ansible_host: 192.168.77.31
+          mysql_server_id: 1
+          mysql_log_basename: master1
+        dbserver2:
+          ansible_host: 192.168.77.56
+          mysql_server_id: 2
+          mysql_log_basename: master2

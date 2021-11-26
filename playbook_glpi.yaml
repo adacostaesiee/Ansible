@@ -3,6 +3,12 @@
   hosts: [webservers]
   become: true
 
+  handlers:
+    - name: Remove install.php
+      file:
+        path: "{{ glpi_install_path }}/glpi/install/install.php"
+        state: absent
+
   vars:
     glpi_version: 9.5.6
     glpi_version_package: glpi-9.5.6.tgz
@@ -45,7 +51,6 @@
       when: ( not glpiinstalled.stat.exists or glpi_update ) and glpi_auto_install
       notify:
         - Remove install.php
-        - Add htaccess
 
     - name: "Set permisions to files directory"
       file:
@@ -62,3 +67,20 @@
         owner: "{{ glpi_web_owner }}"
         group: "{{ glpi_web_group }}"
       when: not glpiinstalled.stat.exists or glpi_update
+
+- name: "eeee"
+  hosts: [dbservers]
+  become: true
+
+  tasks:
+    - name: "Create user with password, all database privileges and 'WITH GRANT OPTION' in db1 and db2"
+      community.mysql.mysql_user:
+        check_implicit_admin: yes
+        login_user: root
+        login_password: root
+        state: present
+        name: glpi
+        password: password
+        host: "%"
+        priv:
+          'glpi.*': 'ALL,GRANT'
