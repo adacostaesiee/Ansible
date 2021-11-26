@@ -13,12 +13,18 @@
           - apache2-doc
           - apache2-utils
           - heartbeat
-          - mod_ssl
           - php
           - php-ldap
           - php-mysql
           - php-mbstring
           - php-gd
+          - php-intl
+          - php-curl
+          - php-xml
+          - php-apcu
+          - php-xmlrpc
+          - php-zip
+          - php7.4-bz2
         update_cache: yes
         state: latest
 
@@ -46,7 +52,7 @@
 
     - name: "Acitvate the VHOST and restarting apache2"
       shell: 'a2ensite webapp'
-      shell: 'service apache2 restart'
+      shell: 'systemctl reload apache2'
 
     - name: "Check services status"
       command: systemctl status "{{ item }}"

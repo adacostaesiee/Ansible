@@ -7,7 +7,7 @@
     glpi_version: 9.5.6
     glpi_version_package: glpi-9.5.6.tgz
 
-    glpi_auto_install: false
+    glpi_auto_install: true
     glpi_update: false
     glpi_download_url: "https://github.com/glpi-project/glpi/releases/download/{{ glpi_version }}/{{ glpi_version_package }}"
 
@@ -38,7 +38,8 @@
       when: not glpiinstalled.stat.exists or glpi_update
 
     - name: "Automatic installation"
-      command: "php bin/console -n db:install -H {{ glpi_db_host }} -P {{ glpi_db_port }} -d {{ glpi_db_name }} -u {{ glpi_db_user }} -p {{ glpi_db_password }}"
+      command: "su root"
+      command: "sudo -u www-data php bin/console -n db:install -H {{ glpi_db_host }} -P {{ glpi_db_port }} -d {{ glpi_db_name }} -u {{ glpi_db_user }} -p {{ glpi_db_password }} --force"
       args:
         chdir: "{{ glpi_install_path }}/glpi"
       when: ( not glpiinstalled.stat.exists or glpi_update ) and glpi_auto_install
@@ -61,20 +62,3 @@
         owner: "{{ glpi_web_owner }}"
         group: "{{ glpi_web_group }}"
       when: not glpiinstalled.stat.exists or glpi_update
-
-    - name: "Download plugins"
-      get_url:
-        url: "{{ item }}"
-        dest: "{{ glpi_install_path }}/glpi/plugins"
-      with_items: "{{ glpi_plugins_dl_addr }}"
-      when: glpi_plugins_dl_addr is defined
-
-    - name: "Unarchive plugins"
-      unarchive:
-        src: "{{ glpi_install_path }}/glpi/plugins/{{ item }}"
-        dest: "{{ glpi_install_path }}/glpi/plugins"
-        owner: "{{ glpi_web_owner }}"
-        group: "{{ glpi_web_group }}"
-        remote_src: true
-      with_items: "{{ glpi_plugins_tar_name }}"
-      when: glpi_plugins_dl_addr is defined

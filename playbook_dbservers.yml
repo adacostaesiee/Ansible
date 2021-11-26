@@ -58,28 +58,14 @@
         host_all: yes
         password: root
 
-    - name: Create user
-      mysql_user:
-        login_host: dbserver1
-        login_user: root
-        login_password: root
-        name: glpi
-        password: password
-        state: present
-        host_all: yes
-
-    - name: Create a new database with name glpi
-      community.mysql.mysql_db:
-        name: glpi
-        login_host: dbserver1
-        login_user: root
-        login_password: root
-        state: present
-
-    - name: Create database user with all database privileges
+    - name: Create user with password, all database privileges and 'WITH GRANT OPTION' in db1 and db2
       community.mysql.mysql_user:
-        name: glpi
-        login_unix_socket: "/var/run/mysqld/mysqld.sock"
-        password: password
-        priv: '*.*:ALL'
+        check_implicit_admin: yes
+        login_user: root
+        login_password: root
         state: present
+        name: glpi
+        password: password
+        host: "%"
+        priv:
+          'glpi.*': 'ALL,GRANT'
