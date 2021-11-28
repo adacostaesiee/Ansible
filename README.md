@@ -1,4 +1,4 @@
-# ESIEE-IT (M2i RS)- Ansible - Advanced Linux Administration final project
+# ESIEE-IT (M2i RS) - Ansible - Advanced Linux Administration final project
 This project aims to develop a secure and redundant infrastructure using automating the deployment and configuration of services (rsyslog, apache, heartbeat, mariadb replication), thanks to Ansible, while using Git to manage versions.
 
 Theses playbooks will automatically install and configure GLPI 9.4.5 an duplicate the database to the 2nd dbserver. Thanks to [Supertarto](https://github.com/supertarto/ansible-glpi)
