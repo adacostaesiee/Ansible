@@ -1,6 +1,8 @@
 ---
 - hosts: [dbservers]
   become: true
+  vars_files:
+    - vars/vault.yml
 
   tasks:
     - name: "Install MariaDB Client 10.3, MariaDB Server 10.3 and MySQL-Python"
@@ -36,10 +38,10 @@
       community.mysql.mysql_user:
         check_implicit_admin: yes
         login_user: root
-        login_password: root
+        login_password: "{{ mysql_root_password }}"
         state: present
         name: glpi
-        password: password
+        password: "{{ mysql_glpi_password }}"
         host: "%"
         priv:
           'glpi.*': 'ALL,GRANT'

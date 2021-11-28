@@ -28,16 +28,14 @@
         path: "/home/esiee/.ssh"
         state: directory
 
-    - name: "Create empty file"
-      file:
-        path: "/home/esiee/.ssh/authorized_keys"
-        state: touch
-
-    - name: "Push pubkey"
-      lineinfile:
-        path: "/home/esiee/.ssh/authorized_keys"
-        line: "{{ pubkey }}"
-        line: "{{ pubkeyzhu }}"
+    - name: "Set up authorized keys"
+      ansible.posix.authorized_key:
+        user: esiee
+        state: present
+        key: '{{ item }}'
+      with_file:
+        - ./id_rsa.pub
+        - ./id_rsa_zhu.pub
 
     - name: "Allow 'admin' group to have passwordless sudo"
       lineinfile:
