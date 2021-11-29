@@ -12,7 +12,6 @@
   vars:
     glpi_version: 9.5.6
     glpi_version_package: glpi-9.5.6.tgz
-
     glpi_auto_install: true
     glpi_update: false
     glpi_download_url: "https://github.com/glpi-project/glpi/releases/download/{{ glpi_version }}/{{ glpi_version_package }}"
@@ -67,25 +66,6 @@
         owner: "{{ glpi_web_owner }}"
         group: "{{ glpi_web_group }}"
       when: not glpiinstalled.stat.exists or glpi_update
-
-- name: "Dbservers"
-  hosts: [dbservers]
-  become: true
-
-  tasks:
-
-    - name: "Apt-get update"
-      shell: 'apt-get update'
-
-    - name:
-      apt:
-        name:
-          - mariadb-server
-          - mariadb-client
-          - python3-pymysql
-          - mysql-client-core-8.0
-        state: latest
-
 
     - name: "Create user with password, all database privileges and 'WITH GRANT OPTION' in db1 and db2"
       community.mysql.mysql_user:

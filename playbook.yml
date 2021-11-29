@@ -54,3 +54,21 @@
         state: present
       when: hostvars[item].ansible_default_ipv4.address is defined
       with_items: "{{groups.all}}"
+
+
+- hosts: [dbservers]
+  become: true
+
+  tasks:
+
+    - name: "Apt-get update"
+      shell: 'apt-get update'
+
+    - name:
+      apt:
+        name:
+          - mariadb-server
+          - mariadb-client
+          - python3-pymysql
+          - mysql-client-core-8.0
+        state: latest

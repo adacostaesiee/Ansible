@@ -76,11 +76,12 @@ sudo apt-get upgrade
 
 ```bash
 cd ./ansible
-ansible-playbook playbook_webservers.yml -i inventory.yaml
-ansible-playbook playbook_glpi.yaml -i inventory.yaml --ask-vault-pass
+ansible-playbook playbook_resetting_mariadb_password_dbservers.yml -i inventory.yaml --ask-vault-pass
+ansible-playbook playbook_webservers.yml -i inventory.yaml --ask-vault-pass
+ansible-playbook playbook_glpi.yml -i inventory.yaml --ask-vault-pass
 ```
 
-**If an error occurs at this step, while installing and unpackaging GLPI, please go on your webservers vm and do this: 
+** If an error occurs at this step, while installing and unpackaging GLPI, please go on your webservers vm and do this: **
 
 ```bash
 sudo rm -r /var/www/glpi
@@ -111,9 +112,10 @@ ansible-playbook playbook_resetting_mariadb_password_dbservers.yml -i inventory.
 Then: 
 
 ```bash
-ansible-playbook playbook_dbservers.yml -i inventory.yaml --ask-vault-pass
 ansible-playbook playbook_dbservers_replication.yml -i inventory.yaml --ask-vault-pass
-ansible-playbook playbook_ntp.yaml -i inventory.yaml --ask-vault-pass
+ansible-playbook playbook_ntp.yml -i inventory.yaml --ask-vault-pass
 ansible-playbook playbook_syslog.yml -i inventory.yaml --ask-vault-pass
 ```
 
+Try replaying every playbooks if it doesn't work.
+It is possible that Internet connectivity problems occur during the download of the packages and thus that this produces errors.
