@@ -1,5 +1,5 @@
 ---
-- name: "Download and install glpi"
+- name: "Installing and configuring NTP"
   hosts: all
   become: true
 
@@ -20,4 +20,4 @@
 
     - name: "Set the timezone registered as a variable"
       timezone:
-        name=: "{{ timezone }}"
+        name: "{{ timezone }}"
