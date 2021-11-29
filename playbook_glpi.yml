@@ -1,10 +1,72 @@
 ---
-- name: "Download and install glpi"
-  hosts: [webservers]
+- hosts: [dbservers]
   become: true
 
   handlers:
-    - name: Remove install.php
+    - name: "Restart mysql service"
+      service:
+        name: mysql
+        state: restarted
+
+  tasks:
+
+    - name: "Create MariaDB Directories"
+      file:
+        path: /data/MariaDB
+        state: directory
+        owner: mysql
+        group: mysql
+        recurse: yes
+      with_items:
+        - db
+        - log
+
+    - name: "Count files in /data/db"
+      find:
+        path: /data/db
+        patterns: '\*'
+      register: db_files
+
+    - name: "Run mysql_install_db only if /data/db is empty"
+      command: mysql_install_db --datadir=/data/db
+      when: db_files.matched|int == 0
+
+    - name: "Push MariaDB config file to dbserver master"
+      template:
+        src: "{{ item }}"
+        dest: /etc/mysql/mariadb.conf.d/{{ item | basename | regex_replace('\.j2$', '') }}
+      with_fileglob:
+        - files/50-server.cnf.j2
+      notify: Restart mysql service
+      when: mysql_server_id==1
+
+    - name: "Push MariaDB config file to dbserver slave"
+      template:
+        src: "{{ item }}"
+        dest: /etc/mysql/mariadb.conf.d/{{ item | basename | regex_replace('\.j2$', '.cnf') }}
+      with_fileglob:
+        - files/50-server.j2
+      notify: Restart mysql service
+      tags: conf
+      when: mysql_server_id==2
+
+    - name: "Create user 'glpi' with password, all database privileges and 'WITH GRANT OPTION' in db1 and db2"
+      community.mysql.mysql_user:
+        login_host: localhost
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        state: present
+        name: glpi
+        password: password
+        host: "%"
+        priv:
+          '*.*': 'ALL,GRANT'
+
+- hosts: [webservers]
+  become: true
+
+  handlers:
+    - name: "Remove install.php"
       file:
         path: "{{ glpi_install_path }}/glpi/install/install.php"
         state: absent
@@ -42,7 +104,7 @@
         validate_certs: false
       when: not glpiinstalled.stat.exists or glpi_update
 
-    - name: "Automatic installation"
+    - name: "GLPI Automatic installation"
       command: "su root"
       command: "sudo -u www-data php bin/console -n db:install -H {{ glpi_db_host }} -P {{ glpi_db_port }} -d {{ glpi_db_name }} -u {{ glpi_db_user }} -p {{ glpi_db_password }} --force"
       args:
@@ -66,16 +128,3 @@
         owner: "{{ glpi_web_owner }}"
         group: "{{ glpi_web_group }}"
       when: not glpiinstalled.stat.exists or glpi_update
-
-    - name: "Create user with password, all database privileges and 'WITH GRANT OPTION' in db1 and db2"
-      community.mysql.mysql_user:
-        check_implicit_admin: yes
-        login_host: dbserver1
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-        state: present
-        name: glpi
-        password: password
-        host: "%"
-        priv:
-          'glpi.*': 'ALL,GRANT'

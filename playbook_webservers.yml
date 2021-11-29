@@ -6,7 +6,7 @@
     - name: "Apt-get update"
       shell: 'apt-get update'
 
-    - name: "Install apache2 and Heartbeat on webservers"
+    - name: "Install apache2, php tools, PyMySql and Heartbeat on webservers"
       apt:
         name:
           - apache2
@@ -51,10 +51,14 @@
         name: heartbeat
         state: started
 
-    - name: "Acitvate the VHOST and restarting apache2"
-      shell: 'a2ensite webapp.conf'
-      shell: 'a2dissite 000-default.conf'
-      shell: 'systemctl reload apache2'
+    - name: "Deactivate the default http conf"
+      shell: /usr/sbin/a2dissite 000-default.conf
+
+    - name: "Activate our http conf"
+      shell: /usr/sbin/a2ensite webapp.conf
+
+    - name: "Reload apache2"
+      shell: systemctl reload apache2
 
     - name: "Check services status"
       command: systemctl status "{{ item }}"
@@ -63,9 +67,3 @@
         - apache2
       register: result
       ignore_errors: yes
-      tags: heartbeat
-
-    - name: showing report
-      debug:
-        var: result.results[0].stdout_lines
-      tags: heartbeat

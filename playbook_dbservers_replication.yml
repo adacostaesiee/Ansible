@@ -6,6 +6,7 @@
 
     - name: "Create empty glpi database"
       community.mysql.mysql_db:
+        login_host: localhost
         login_user: root
         login_password: "{{ mysql_root_password }}"
         name:
@@ -16,43 +17,27 @@
     - name: "Create replication_user inside of the database"
       community.mysql.mysql_query:
         login_user: root
-        login_db: glpi
         login_password: "{{ mysql_root_password }}"
         query: CREATE USER IF NOT EXISTS 'replication_user'@'%' IDENTIFIED BY '{{ mysql_replication_password }}';
 
-    - name: "Grant REPLICATION SLAVE privileges"
+    - name: "Grant REPLICATION SLAVE privileges to replication_user"
       community.mysql.mysql_query:
+        login_host: localhost
         login_user: root
-        login_db: glpi
         login_password: "{{ mysql_root_password }}"
         query: GRANT REPLICATION SLAVE ON *.* TO 'replication_user'@'%';
-
-    - name: "Grant SUPER PRIVILEGES on root remote account"
-      community.mysql.mysql_query:
-        login_user: root
-        login_db: glpi
-        login_password: "{{ mysql_root_password }}"
-        query: GRANT SUPER ON *.* TO 'root'@'%';
 
     - name: "Restart mysql service"
       service:
         name: mysql
         state: restarted
 
-    - name: "Grant REPLICATION SLAVE privileges"
-      community.mysql.mysql_query:
-        login_user: root
-        login_db: glpi
-        login_password: "{{ mysql_root_password }}"
-        query: GRANT REPLICATION SLAVE ON *.* TO 'replication_user'@'%';
-        positional_args:
-
     - block:
 
       - name: "Get master status"
         community.mysql.mysql_query:
+          login_host: localhost
           login_user: root
-          login_db: glpi
           login_password: "{{ mysql_root_password }}"
           query: SHOW MASTER STATUS;
         register: File
@@ -64,8 +49,8 @@
 
       - name: "Stop slave"
         community.mysql.mysql_query:
+          login_host: localhost
           login_user: root
-          login_host: dbserver2
           login_password: "{{ mysql_root_password }}"
           query: STOP SLAVE;
         when: mysql_server_id==2
@@ -73,20 +58,19 @@
 
       - name: "Change master to"
         community.mysql.mysql_query:
+          login_host: localhost
           login_user: root
-          login_db: glpi
           login_password: "{{ mysql_root_password }}"
           query: CHANGE MASTER TO MASTER_HOST='dbserver1', MASTER_USER='replication_user', MASTER_PASSWORD='{{ mysql_replication_password }}', MASTER_PORT=3306, MASTER_LOG_FILE='{{ item.file }}', MASTER_LOG_POS={{ item.position }}, MASTER_CONNECT_RETRY=10;
-          positional_args:
         when: mysql_server_id==2
         with_items:
           - file: "{{ hostvars['dbserver1']['File'].query_result[0][0].File}}"
             position: "{{ hostvars['dbserver1']['File'].query_result[0][0].Position}}"
 
-      - name: "Stop slave"
+      - name: "Start slave"
         community.mysql.mysql_query:
+          login_host: localhost
           login_user: root
-          login_host: dbserver2
           login_password: "{{ mysql_root_password }}"
           query: START SLAVE;
         when: mysql_server_id==2

@@ -2,37 +2,37 @@
 - hosts: [syslogservers]
   become: true
   tasks:
-    - name: install rsyslog
+    - name: "Install rsyslog on syslogserver(s)"
       apt:
         name: rsyslog
         update_cache: yes
         state: present
 
-    - name: Activer le UDP
+    - name: "UDP Activation"
       ansible.builtin.lineinfile:
         path: /etc/rsyslog.conf
         regexp: '^(.)module(load="imudp")$'
         line: 'module(load="imudp")'
 
-    - name: Activer le port UDP
+    - name: "UDP Port 514 Activation"
       ansible.builtin.lineinfile:
         path: /etc/rsyslog.conf
         regexp: '^(.)input(type="imudp" port="514")$'
         line: 'input(type="imudp" port="514")'
 
-    - name: Activer le TCP
+    - name: "TCP Activation"
       ansible.builtin.lineinfile:
         path: /etc/rsyslog.conf
         regexp: '^(.)module(load="imtcp")$'
         line: 'module(load="imtcp")'
 
-    - name: Activer le port TCP
+    - name: "TCP 10514 Activation"
       ansible.builtin.lineinfile:
         path: /etc/rsyslog.conf
         regexp: '^(.)input(type="imtcp" port="514")$'
         line: 'input(type="imtcp" port="10514")'
 
-    - name: Redémarrer le service Syslog
+    - name: "Syslog service reboot"
       service:
         name: rsyslog
         state: restarted
@@ -40,19 +40,19 @@
 - hosts: [webservers, dbservers]
   become: true
   tasks:
-    - name: install rsyslog
+    - name: "Install rsyslog on client servers"
       apt:
         name: rsyslog
         update_cache: yes
         state: present
 
-    - name: Ajout du serveur dans le fichier de configuration
+    - name: "Modify rsyslog.conf to add syslogserver "
       ansible.builtin.lineinfile:
         path: /etc/rsyslog.conf
         line: '*.* @{{ hostvars[item].ansible_default_ipv4.address }}:514'
       with_items: "{{groups['syslogservers']}}"
 
-    - name: Redémarrer le service Syslog
+    - name: "Syslog service reboot"
       service:
         name: rsyslog
         state: restarted

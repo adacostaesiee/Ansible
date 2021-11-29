@@ -4,17 +4,15 @@
   vars:
     users:
       - "esiee"
-    pubkey: "{{ lookup('file', './id_rsa.pub') }}"
-    pubkeyzhu: "{{ lookup('file', './id_rsa_zhu.pub') }}"
 
   tasks:
-    - ping: ~
+
     - name: "Create admin group"
       group:
         name: "admin"
         state: present
 
-    - name: "Add sudoers users to admin group"
+    - name: "Add sudoers users to 'admin' group"
       user:
         name: "{{ item }}"
         groups: "admin"
@@ -29,16 +27,17 @@
         state: directory
       with_items: "{{ users }}"
 
-    - name: "Set up authorized keys"
+    - name: "Set up authorized keys to be able to SSH through VMs"
       ansible.posix.authorized_key:
         user: esiee
         state: present
         key: '{{ item }}'
       with_file:
         - ./id_rsa.pub
+        - ./id_rsa_2.pub
         - ./id_rsa_fleury.pub
 
-    - name: "Allow 'admin' group to have passwordless sudo"
+    - name: "Allow 'admin' group to sudo without password"
       lineinfile:
         dest: /etc/sudoers
         state: present
@@ -46,7 +45,7 @@
         line: '%admin ALL=(ALL) NOPASSWD: ALL'
         validate: 'visudo -cf %s'
 
-    - name: "Build hosts file"
+    - name: "Build hosts file and dispatch it automatically through all the VMs"
       lineinfile:
         path: /etc/hosts
         regexp: '.*{{ item }}$'
@@ -61,14 +60,13 @@
 
   tasks:
 
-    - name: "Apt-get update"
+    - name: "apt-get update"
       shell: 'apt-get update'
 
-    - name:
+    - name: "Install some packages"
       apt:
         name:
           - mariadb-server
           - mariadb-client
           - python3-pymysql
-          - mysql-client-core-8.0
         state: latest

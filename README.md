@@ -12,34 +12,36 @@ This infrastructure requires at least 5 machines:
 - dbserver2: x.x.x.x/x
 - syslog: x.x.x.x/x
 
-+ Your Ansible Orchestrator.
++ Your Ansible Orchestrator
 
-+ An aditionnal IP Address for the Virtual IP of the Web cluster.
 
-+ An ansible-vault password, 'esiee' for our example. 
++ An aditionnal IP Address for the Virtual IP of the Web cluster
+
++ An ansible-vault password, 'esiee' for our example.
 
 ## How to set-up the project?
 
-Open **inventory.yaml** with a text editor, and modify as you want host's IP Addresses.
+* Install [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+
+
+```
+https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+```
+
+
+* Open **inventory.yaml** with a text editor, and modify as you want host's IP Addresses.
 Then, modify the value of 'ansible_user' field by your local sudoer account.
 Add your Ansible Orchestrator's public key to ./ and name it 'id_rsa.pub'
 
-Open a terminal on your **Ansible Orchestrator**, and type: 
+* Open a terminal on your **Ansible Orchestrator**, and type: 
 
 ```bash
-cd ansible
 ansible-galaxy collection install ansible.posix
 ansible-galaxy collection install community.mysql
-ansible-playbook playbook.yml -i inventory.yaml -K --ask-vault-pass -e "ansible_user=YourLocalSudoerAccount" --ask-pass
+cd ansible
 ```
 
-You'll have to give your local sudoer account password, just for this time. 
-
-/!\ If this doesn't work, try using 'ssh-copy-id' from your Ansible Orchestrator to your remotes hosts before.
-
-```bash
-ssh-copy-id YourUsername@YourRemoteHost
-```
+You'll have to give your local sudoer account password, just for this time.
 
 Don't forget to modify the Jinga2 templates. 
 
@@ -64,57 +66,33 @@ webserver1 IPaddr::x.x.x.x/xx/ethx:0
 ServerName your.server.name
 ```
 
-You are now ready to play.
+**You are now ready to play.**
 
 
-If it crashs during packet installation, you may try on every VM:
+/!\ If it crashs during packet installation, you may try on every VM:
 
 ```bash
 sudo apt-get update
 sudo apt-get upgrade
 ```
-
+_______________________
+/!\ If a playbook's crashing during execution, relaunch it.
+_______________________
+/!\ If an error occurs at this step, while installing and unpackaging GLPI, please go on your webservers vm and do this:
 ```bash
-cd ./ansible
+sudo rm -r /var/www/glpi
+```
+_______________________
+* Let's start with: 
+```bash
+ansible-playbook playbook.yml -i inventory.yaml -K --ask-vault-pass -e "ansible_user=YourLocalSudoerAccount" --ask-pass
 ansible-playbook playbook_resetting_mariadb_password_dbservers.yml -i inventory.yaml --ask-vault-pass
-ansible-playbook playbook_webservers.yml -i inventory.yaml --ask-vault-pass
 ansible-playbook playbook_glpi.yml -i inventory.yaml --ask-vault-pass
-```
-
-** If an error occurs at this step, while installing and unpackaging GLPI, please go on your webservers vm and do this: **
-
-```bash
-sudo rm -r /var/www/glpi
-```
-
-**If an error occurs at this step, while installing and unpackaging GLPI, please go on your webservers vm and do this: 
-
-```bash
-sudo rm -r /var/www/glpi
-```
-
-It will crash because of mysql default root password
-
-Then, run: 
-
-```bash
-ansible-playbook playbook_dbservers.yml -i inventory.yaml --ask-vault-pass
-```
-
-It will crash another time.
-
-Run: 
-
-```bash
-ansible-playbook playbook_resetting_mariadb_password_dbservers.yml -i inventory.yaml --ask-vault-pass
-```
-
-Then: 
-
-```bash
+ansible-playbook playbook_webservers.yml -i inventory.yaml --ask-vault-pass
 ansible-playbook playbook_dbservers_replication.yml -i inventory.yaml --ask-vault-pass
-ansible-playbook playbook_ntp.yml -i inventory.yaml --ask-vault-pass
 ansible-playbook playbook_syslog.yml -i inventory.yaml --ask-vault-pass
+ansible-playbook playbook_ntp.yml -i inventory.yaml --ask-vault-pass
+ansible-playbook playbook_dbservers.yml -i inventory.yaml --ask-vault-pass
 ```
 
 Try replaying every playbooks if it doesn't work.
