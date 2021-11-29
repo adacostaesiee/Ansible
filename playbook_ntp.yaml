@@ -1,0 +1,23 @@
+---
+- name: "Download and install glpi"
+  hosts: all
+  become: true
+
+
+  vars:
+    timezone: CET #Central European Time
+
+  tasks:
+    - name: "Install NTP"
+      apt:
+        name: ntp
+
+    - name: "Ensure NTP is started"
+      service:
+        name: ntp
+        state: started
+        enabled: yes
+
+    - name: "Set the timezone registered as a variable"
+      timezone:
+        name=: "{{ timezone }}"

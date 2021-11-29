@@ -28,7 +28,7 @@ Open a terminal on your **Ansible Orchestrator**, and type:
 
 ```bash
 cd ansible
-ansible-playbook playbook.yml -i inventory.yaml -K -u YourLocalUsername
+ansible-playbook playbook.yml -i inventory.yaml -K --ask-vault-pass -e "ansible_user=YourLocalSudoerAccount" --ask-pass
 ```
 
 You'll have to give your local sudoer account password, juste for this time. 

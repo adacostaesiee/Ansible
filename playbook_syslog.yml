@@ -1,0 +1,63 @@
+---
+- hosts: [syslogservers]
+  become: true
+  tasks:
+    - name: install rsyslog
+      apt:
+        name: rsyslog
+        update_cache: yes
+        state: present
+
+    - name: Activer le UDP
+      ansible.builtin.lineinfile:
+        path: /etc/rsyslog.conf
+        regexp: '^(.)module(load="imudp")$'
+        line: 'module(load="imudp")'
+
+    - name: Activer le port UDP
+      ansible.builtin.lineinfile:
+        path: /etc/rsyslog.conf
+        regexp: '^(.)input(type="imudp" port="514")$'
+        line: 'input(type="imudp" port="514")'
+
+    - name: Activer le TCP
+      ansible.builtin.lineinfile:
+        path: /etc/rsyslog.conf
+        regexp: '^(.)module(load="imtcp")$'
+        line: 'module(load="imtcp")'
+
+    - name: Activer le port TCP
+      ansible.builtin.lineinfile:
+        path: /etc/rsyslog.conf
+        regexp: '^(.)input(type="imtcp" port="514")$'
+        line: 'input(type="imtcp" port="10514")'
+
+    - name: Redémarrer le service Syslog
+      service:
+        name: rsyslog
+        state: restarted
+
+- hosts: [webservers, dbservers]
+  become: true
+  tasks:
+    - name: install rsyslog
+      apt:
+        name: rsyslog
+        update_cache: yes
+        state: present
+
+    - name: Ajout du serveur dans le fichier de configuration
+      ansible.builtin.lineinfile:
+        path: /etc/rsyslog.conf
+        line: '*.* @{{ hostvars[item].ansible_default_ipv4.address }}:514'
+      with_items: "{{groups['syslogservers']}}"
+
+    - name: Redémarrer le service Syslog
+      service:
+        name: rsyslog
+        state: restarted
+
+    - name: "Logger test"
+      shell: 'logger -p local0.err "Les logs de "{{ item }}" sont bien redirigés vers le serveur Syslog."'
+      with_items:
+        - "{{groups['webservers']}}"

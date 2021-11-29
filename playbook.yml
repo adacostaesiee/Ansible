@@ -25,8 +25,9 @@
 
     - name: "Create directory"
       file:
-        path: "/home/esiee/.ssh"
+        path: "/home/{{ item }}/.ssh"
         state: directory
+      with_items: "{{ users }}"
 
     - name: "Set up authorized keys"
       ansible.posix.authorized_key:
