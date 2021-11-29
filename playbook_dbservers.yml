@@ -1,8 +1,12 @@
 ---
 - hosts: [dbservers]
   become: true
-  vars_files:
-    - vars/vault.yml
+
+  handlers:
+    - name: "Restart mysql service"
+      service:
+        name: mysql
+        state: restarted
 
   tasks:
     - name: "Install MariaDB Client 10.3, MariaDB Server 10.3 and MySQL-Python"
@@ -11,6 +15,7 @@
           - mariadb-server
           - mariadb-client
           - python3-pymysql
+          - mysql-client-core-8.0
         state: latest
 
     - name: "Create MariaDB Directories"
@@ -46,17 +51,6 @@
         priv:
           'glpi.*': 'ALL,GRANT'
 
-- hosts: dbserver1
-  become: true
-
-  handlers:
-    - name: "Restart mysql service"
-      service:
-        name: mysql
-        state: restarted
-
-  tasks:
-
     - name: "Push MariaDB config file to dbserver master"
       template:
         src: "{{ item }}"
@@ -64,22 +58,43 @@
       with_fileglob:
         - files/50-server.cnf.j2
       notify: Restart mysql service
+      when: mysql_server_id==1
 
-- hosts: dbserver2
-  become: true
-
-  handlers:
-    - name: "Restart mysql service"
-      service:
-        name: mysql
-        state: restarted
-
-  tasks:
-
-    - name: "Push MariaDB config file to dbserver master"
+    - name: "Push MariaDB config file to dbserver slave"
       template:
         src: "{{ item }}"
         dest: /etc/mysql/mariadb.conf.d/{{ item | basename | regex_replace('\.j2$', '.cnf') }}
       with_fileglob:
         - files/50-server.j2
       notify: Restart mysql service
+      tags: conf
+      when: mysql_server_id==2
+
+    - name: "Create backup directory"
+      file:
+        path: "/etc/backups/"
+        state: directory
+      when: mysql_server_id==2
+
+    - name: "Push backup script"
+      template:
+        src: "{{ item }}"
+        dest: /etc/backups/{{ item | basename | regex_replace('\.j2$', '') }}.sh
+      with_fileglob:
+        - files/backupsql.j2
+      when: mysql_server_id==2
+
+    - name: Creates weekly backup cronjob
+      cron:
+        minute: "25"
+        hour: "15"
+        weekday: "*"
+        name: "Backup mysql GLPI DB"
+        cron_file: "glpidailybackups.daily"
+        user: "root"
+        job: '/etc/backups/backupsql.sh'
+      when: mysql_server_id==2
+
+    - name: "Change backup script rights"
+      shell: 'chmod +x /etc/backups/backupsql.sh'
+      when: mysql_server_id==2

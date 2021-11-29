@@ -42,7 +42,7 @@ binlog-format=mixed
 #table_cache            = 64
 #thread_concurrency     = 10
 
-#
+
 # * Query Cache Configuration
 #
 #query_cache_limit      = 1M
@@ -133,3 +133,9 @@ collation-server      = utf8mb4_general_ci
 # If you use the same .cnf file for MariaDB of different versions,
 # use this group for options that older servers don't understand
 [mariadb-10.3]
+
+[mysqldump]
+host = localhost
+port = 3306
+user = root
+password = {{mysql_root_password}}
