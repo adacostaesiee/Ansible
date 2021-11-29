@@ -28,12 +28,14 @@ Open a terminal on your **Ansible Orchestrator**, and type:
 
 ```bash
 cd ansible
+ansible-galaxy collection install ansible.posix
+ansible-galaxy collection install community.mysql
 ansible-playbook playbook.yml -i inventory.yaml -K --ask-vault-pass -e "ansible_user=YourLocalSudoerAccount" --ask-pass
 ```
 
-You'll have to give your local sudoer account password, juste for this time. 
+You'll have to give your local sudoer account password, just for this time. 
 
-If this doesn't work, try using 'ssh-copy-id' from your Ansible Orchestrator to your remotes hosts before.
+/!\ If this doesn't work, try using 'ssh-copy-id' from your Ansible Orchestrator to your remotes hosts before.
 
 ```bash
 ssh-copy-id YourUsername@YourRemoteHost
@@ -64,13 +66,54 @@ ServerName your.server.name
 
 You are now ready to play.
 
+
+If it crashs during packet installation, you may try on every VM:
+
+```bash
+sudo apt-get update
+sudo apt-get upgrade
+```
+
 ```bash
 cd ./ansible
-ansible-playbook playbook.yml -i inventory.yaml
-ansible-playbookplaybook_webservers.yml -i inventory.yaml
-ansible-playbookplaybook_glpi.yml -i inventory.yaml
-ansible-playbookplaybook_dbservers.yml -i inventory.yaml
-ansible-playbookplaybook_resetting_mariadb_password_dbservers.yml -i inventory.yaml
-ansible-playbookplaybook_dbservers.yml -i inventory.yaml
+ansible-playbook playbook_webservers.yml -i inventory.yaml
+ansible-playbook playbook_glpi.yaml -i inventory.yaml --ask-vault-pass
+```
+
+**If an error occurs at this step, while installing and unpackaging GLPI, please go on your webservers vm and do this: 
+
+```bash
+sudo rm -r /var/www/glpi
+```
+
+**If an error occurs at this step, while installing and unpackaging GLPI, please go on your webservers vm and do this: 
+
+```bash
+sudo rm -r /var/www/glpi
+```
+
+It will crash because of mysql default root password
+
+Then, run: 
+
+```bash
+ansible-playbook playbook_dbservers.yml -i inventory.yaml --ask-vault-pass
+```
+
+It will crash another time.
+
+Run: 
+
+```bash
+ansible-playbook playbook_resetting_mariadb_password_dbservers.yml -i inventory.yaml --ask-vault-pass
+```
+
+Then: 
+
+```bash
+ansible-playbook playbook_dbservers.yml -i inventory.yaml --ask-vault-pass
+ansible-playbook playbook_dbservers_replication.yml -i inventory.yaml --ask-vault-pass
+ansible-playbook playbook_ntp.yaml -i inventory.yaml --ask-vault-pass
+ansible-playbook playbook_syslog.yml -i inventory.yaml --ask-vault-pass
 ```
 
