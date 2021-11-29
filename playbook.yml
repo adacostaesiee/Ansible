@@ -36,7 +36,7 @@
         key: '{{ item }}'
       with_file:
         - ./id_rsa.pub
-        - ./id_rsa_zhu.pub
+        - ./id_rsa_fleury.pub
 
     - name: "Allow 'admin' group to have passwordless sudo"
       lineinfile:

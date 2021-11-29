@@ -1,8 +1,6 @@
 ---
 - hosts: [dbservers]
   become: true
-  vars_files:
-    - vars/vault.yml
 
   tasks:
 
