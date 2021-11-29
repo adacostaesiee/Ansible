@@ -68,16 +68,31 @@
         group: "{{ glpi_web_group }}"
       when: not glpiinstalled.stat.exists or glpi_update
 
-- name: "eeee"
+- name: "Dbservers"
   hosts: [dbservers]
   become: true
 
   tasks:
+
+    - name: "Apt-get update"
+      shell: 'apt-get update'
+
+    - name:
+      apt:
+        name:
+          - mariadb-server
+          - mariadb-client
+          - python3-pymysql
+          - mysql-client-core-8.0
+        state: latest
+
+
     - name: "Create user with password, all database privileges and 'WITH GRANT OPTION' in db1 and db2"
       community.mysql.mysql_user:
         check_implicit_admin: yes
+        login_host: dbserver1
         login_user: root
-        login_password: root
+        login_password: "{{ mysql_root_password }}"
         state: present
         name: glpi
         password: password

@@ -9,14 +9,6 @@
         state: restarted
 
   tasks:
-    - name: "Install MariaDB Client 10.3, MariaDB Server 10.3 and MySQL-Python"
-      apt:
-        name:
-          - mariadb-server
-          - mariadb-client
-          - python3-pymysql
-          - mysql-client-core-8.0
-        state: latest
 
     - name: "Create MariaDB Directories"
       file:
@@ -39,18 +31,6 @@
       command: mysql_install_db --datadir=/data/db
       when: db_files.matched|int == 0
 
-    - name: "Create user with password, all database privileges and 'WITH GRANT OPTION' in db1 and db2"
-      community.mysql.mysql_user:
-        check_implicit_admin: yes
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-        state: present
-        name: glpi
-        password: "{{ mysql_glpi_password }}"
-        host: "%"
-        priv:
-          'glpi.*': 'ALL,GRANT'
-
     - name: "Push MariaDB config file to dbserver master"
       template:
         src: "{{ item }}"
@@ -69,6 +49,19 @@
       notify: Restart mysql service
       tags: conf
       when: mysql_server_id==2
+
+    - name: "Create user with password, all database privileges and 'WITH GRANT OPTION' in db1 and db2"
+      community.mysql.mysql_user:
+        check_implicit_admin: yes
+        login_host: localhost
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        state: present
+        name: glpi
+        password: "{{ mysql_glpi_password }}"
+        host: "%"
+        priv:
+          'glpi.*': 'ALL,GRANT'
 
     - name: "Create backup directory"
       file:
