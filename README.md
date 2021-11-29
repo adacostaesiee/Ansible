@@ -33,6 +33,12 @@ ansible-playbook playbook.yml -i inventory.yaml -K -u YourLocalUsername
 
 You'll have to give your local sudoer account password, juste for this time. 
 
+If this doesn't work, try using 'ssh-copy-id' from your Ansible Orchestrator to your remotes hosts before.
+
+```bash
+ssh-copy-id YourUsername@YourRemoteHost
+```
+
 Don't forget to modify the Jinga2 templates. 
 
 **./templates/authkeys.j2**
