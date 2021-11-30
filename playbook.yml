@@ -3,7 +3,7 @@
   become: true
   vars:
     users:
-      - "esiee"
+      - "seb"
 
   tasks:
 
@@ -29,7 +29,7 @@
 
     - name: "Set up authorized keys to be able to SSH through VMs"
       ansible.posix.authorized_key:
-        user: esiee
+        user: seb
         state: present
         key: '{{ item }}'
       with_file:

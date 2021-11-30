@@ -6,26 +6,10 @@
     - name: "Apt-get update"
       shell: 'apt-get update'
 
-    - name: "Install apache2, php tools, PyMySql and Heartbeat on webservers"
+    - name: "Install Heartbeat on webservers"
       apt:
         name:
-          - apache2
-          - apache2-doc
-          - apache2-utils
           - heartbeat
-          - php
-          - php-ldap
-          - php-mysql
-          - php-mbstring
-          - php-gd
-          - php-intl
-          - php-curl
-          - php-xml
-          - php-apcu
-          - php-xmlrpc
-          - php-zip
-          - php7.4-bz2
-          - python3-pymysql
         update_cache: yes
         state: latest
 
@@ -59,6 +43,9 @@
 
     - name: "Reload apache2"
       shell: systemctl reload apache2
+
+    - name: "Reload Heartbeat"
+      shell: systemctl restart heartbeat.service
 
     - name: "Check services status"
       command: systemctl status "{{ item }}"

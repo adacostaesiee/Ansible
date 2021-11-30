@@ -94,6 +94,28 @@
         path: "{{ glpi_install_path }}/glpi"
       register: glpiinstalled
 
+    - name: "Install apache2, php tools, PyMySql webservers"
+      apt:
+        name:
+          - apache2
+          - apache2-doc
+          - apache2-utils
+          - php
+          - php-ldap
+          - php-mysql
+          - php-mbstring
+          - php-gd
+          - php-intl
+          - php-curl
+          - php-xml
+          - php-apcu
+          - php-xmlrpc
+          - php-zip
+          - php7.4-bz2
+          - python3-pymysql
+        update_cache: yes
+        state: latest
+
     - name: "Download and extract GLPI"
       unarchive:
         src: "{{ glpi_download_url }}"

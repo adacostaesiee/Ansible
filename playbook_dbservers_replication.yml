@@ -4,15 +4,6 @@
 
   tasks:
 
-    - name: "Create empty glpi database"
-      community.mysql.mysql_db:
-        login_host: localhost
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-        name:
-          - glpi
-        state: present
-      when: mysql_server_id==2
 
     - name: "Create replication_user inside of the database"
       community.mysql.mysql_query:

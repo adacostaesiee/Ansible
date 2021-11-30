@@ -1,25 +1,25 @@
 all:
   vars:
     ansible_python_interpreter: /usr/bin/python3
-    ansible_user: esiee
+    ansible_user: seb
   children:
     webservers:
       hosts:
         webserver1:
-          ansible_host: 192.168.77.93
+          ansible_host: 192.168.77.50
         webserver2:
-          ansible_host: 192.168.77.43
+          ansible_host: 192.168.77.39
     dbservers:
       hosts:
         dbserver1:
-          ansible_host: 192.168.77.31
+          ansible_host: 192.168.77.97
           mysql_server_id: 1
           mysql_log_basename: master1
         dbserver2:
-          ansible_host: 192.168.77.12
+          ansible_host: 192.168.77.86
           mysql_server_id: 2
           mysql_log_basename: master2
     syslogservers:
       hosts:
         syslogserver1:
-          ansible_host: 192.168.77.67
+          ansible_host: 192.168.77.21
